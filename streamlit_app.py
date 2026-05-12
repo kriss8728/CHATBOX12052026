@@ -23,7 +23,7 @@ st.markdown(
 )
 
 # Lấy OpenAI API key từ st.secrets
-openai_api_key = "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"
+openai_api_key = st.secrets.get("OPENAI_API_KEY")
 
 # Khởi tạo OpenAI client
 client = OpenAI(api_key=openai_api_key)
