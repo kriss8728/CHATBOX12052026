@@ -25,6 +25,11 @@ st.markdown(
 # Lấy OpenAI API key từ st.secrets
 openai_api_key = st.secrets.get("OPENAI_API_KEY")
 
+# Kiểm tra nếu thiếu API Key
+if not openai_api_key:
+    st.error("⚠️ Thiếu OpenAI API Key! Vui lòng bổ sung vào file `.streamlit/secrets.toml` hoặc thiết lập trong Streamlit Cloud Secrets.")
+    st.stop()
+
 # Khởi tạo OpenAI client
 client = OpenAI(api_key=openai_api_key)
 
@@ -76,11 +81,15 @@ if prompt := st.chat_input("Sếp nhập nội dung cần trao đổi ở đây 
 
     # Tạo phản hồi từ API OpenAI
     response = ""
-    stream = client.chat.completions.create(
-        model=rfile("module_chatgpt.txt").strip(),
-        messages=[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages],
-        stream=True,
-    )
+    try:
+        stream = client.chat.completions.create(
+            model=rfile("module_chatgpt.txt").strip(),
+            messages=[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages],
+            stream=True,
+        )
+    except Exception as e:
+        st.error(f"❌ Lỗi khi gọi OpenAI API: {e}")
+        st.stop()
 
     # Ghi lại phản hồi của trợ lý vào biến
     for chunk in stream:
